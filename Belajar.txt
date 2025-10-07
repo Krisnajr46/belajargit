@@ -1,0 +1,3 @@
+Rangkuman:
+- Hari ini belajar tentang Remote Branch dan Pull Request.
+- Sudah paham konsep dasar branching & merging.
