@@ -1,3 +1,510 @@
-Rangkuman:
-- Hari ini belajar tentang Remote Branch dan Pull Request.
-- Sudah paham konsep dasar branching & merging.
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengacak Kelompok</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .input-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .settings-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 14px 32px;
+            background: white;
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .file-upload-label:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-export:hover {
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.6);
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .group {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .group:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .group-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-size: 1.2em;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .member {
+            padding: 10px 16px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 8px;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .member:hover {
+            transform: translateX(5px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .info {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #856404;
+            font-size: 0.95em;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #721c24;
+            font-size: 0.95em;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #155724;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .settings-row,
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .results {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Pengacak Kelompok</h1>
+        <p class="subtitle">Bagi tim dengan mudah dan acak! Dukung Excel Import/Export</p>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label>📂 Import dari Excel</label>
+                <div class="file-upload">
+                    <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="handleFileUpload(event)">
+                    <label for="excelFile" class="file-upload-label">
+                        📥 Pilih File Excel (.xlsx, .xls)
+                    </label>
+                </div>
+                <small style="color: #666; display: block; margin-top: 8px;">
+                    Format Excel: Kolom pertama berisi nama anggota
+                </small>
+            </div>
+
+            <div class="input-group">
+                <label>📝 Daftar Anggota (satu nama per baris)</label>
+                <textarea id="members" placeholder="Andi&#10;Budi&#10;Citra&#10;Dewi&#10;Eka&#10;Fahmi&#10;Gita&#10;Hadi"></textarea>
+            </div>
+
+            <div class="settings-row">
+                <div class="input-group">
+                    <label>👥 Jumlah Kelompok</label>
+                    <input type="number" id="numGroups" value="3" min="1">
+                </div>
+
+                <div class="input-group">
+                    <label>👤 Maksimal Anggota per Kelompok</label>
+                    <input type="number" id="maxPerGroup" value="5" min="1">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="randomizeGroups()">✨ Acak Kelompok</button>
+                <button class="btn-export" onclick="exportToExcel()" id="exportBtn" disabled>📤 Export ke Excel</button>
+            </div>
+        </div>
+
+        <div id="message"></div>
+        <div id="results" class="results"></div>
+    </div>
+
+    <script>
+        let currentGroups = [];
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const messageDiv = document.getElementById('message');
+            
+            if (!file) return;
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    const names = jsonData
+                        .map(row => row[0])
+                        .filter(name => name && String(name).trim() !== '')
+                        .map(name => String(name).trim());
+                    
+                    if (names.length === 0) {
+                        messageDiv.innerHTML = '<div class="error">⚠️ File Excel tidak mengandung data yang valid!</div>';
+                        return;
+                    }
+                    
+                    document.getElementById('members').value = names.join('\n');
+                    messageDiv.innerHTML = `<div class="success">✅ Berhasil import ${names.length} nama dari Excel!</div>`;
+                    
+                    setTimeout(() => {
+                        messageDiv.innerHTML = '';
+                    }, 3000);
+                    
+                } catch (error) {
+                    messageDiv.innerHTML = '<div class="error">⚠️ Gagal membaca file Excel. Pastikan formatnya benar!</div>';
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        function randomizeGroups() {
+            const membersText = document.getElementById('members').value.trim();
+            const numGroups = parseInt(document.getElementById('numGroups').value);
+            const maxPerGroup = parseInt(document.getElementById('maxPerGroup').value);
+            const messageDiv = document.getElementById('message');
+            const resultsDiv = document.getElementById('results');
+            const exportBtn = document.getElementById('exportBtn');
+
+            messageDiv.innerHTML = '';
+            resultsDiv.innerHTML = '';
+            currentGroups = [];
+            exportBtn.disabled = true;
+
+            if (!membersText) {
+                messageDiv.innerHTML = '<div class="error">⚠️ Silakan masukkan daftar anggota!</div>';
+                return;
+            }
+
+            if (numGroups < 1) {
+                messageDiv.innerHTML = '<div class="error">⚠️ Jumlah kelompok harus minimal 1!</div>';
+                return;
+            }
+
+            if (maxPerGroup < 1) {
+                messageDiv.innerHTML = '<div class="error">⚠️ Maksimal anggota per kelompok harus minimal 1!</div>';
+                return;
+            }
+
+            const members = membersText.split('\n')
+                .map(m => m.trim())
+                .filter(m => m.length > 0);
+
+            if (members.length === 0) {
+                messageDiv.innerHTML = '<div class="error">⚠️ Tidak ada anggota yang valid!</div>';
+                return;
+            }
+
+            const totalCapacity = numGroups * maxPerGroup;
+            if (members.length > totalCapacity) {
+                messageDiv.innerHTML = `<div class="info">ℹ️ Total anggota (${members.length}) melebihi kapasitas (${totalCapacity}). Beberapa anggota mungkin tidak masuk kelompok.</div>`;
+            }
+
+            const shuffled = [...members].sort(() => Math.random() - 0.5);
+            const groups = Array.from({ length: numGroups }, () => []);
+            
+            let memberIndex = 0;
+            for (let i = 0; i < shuffled.length && memberIndex < shuffled.length; i++) {
+                const groupIndex = i % numGroups;
+                if (groups[groupIndex].length < maxPerGroup) {
+                    groups[groupIndex].push(shuffled[memberIndex]);
+                    memberIndex++;
+                }
+            }
+
+            currentGroups = groups;
+
+            groups.forEach((group, index) => {
+                if (group.length > 0) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'group';
+                    
+                    const header = document.createElement('div');
+                    header.className = 'group-header';
+                    header.textContent = `Kelompok ${index + 1} (${group.length} anggota)`;
+                    groupDiv.appendChild(header);
+
+                    group.forEach(member => {
+                        const memberDiv = document.createElement('div');
+                        memberDiv.className = 'member';
+                        memberDiv.textContent = member;
+                        groupDiv.appendChild(memberDiv);
+                    });
+
+                    resultsDiv.appendChild(groupDiv);
+                }
+            });
+
+            if (memberIndex < shuffled.length) {
+                messageDiv.innerHTML += `<div class="error">⚠️ ${shuffled.length - memberIndex} anggota tidak dapat masuk kelompok karena keterbatasan kapasitas!</div>`;
+            }
+
+            exportBtn.disabled = false;
+        }
+
+        function exportToExcel() {
+            if (currentGroups.length === 0) {
+                alert('Belum ada hasil kelompok untuk di-export!');
+                return;
+            }
+
+            const data = [];
+            data.push(['Kelompok', 'Nama Anggota', 'No. Urut']);
+
+            currentGroups.forEach((group, groupIndex) => {
+                group.forEach((member, memberIndex) => {
+                    data.push([
+                        `Kelompok ${groupIndex + 1}`,
+                        member,
+                        memberIndex + 1
+                    ]);
+                });
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            
+            const colWidths = [
+                { wch: 15 },
+                { wch: 30 },
+                { wch: 10 }
+            ];
+            worksheet['!cols'] = colWidths;
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Hasil Kelompok');
+
+            const timestamp = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(workbook, `Hasil_Kelompok_${timestamp}.xlsx`);
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<div class="success">✅ File Excel berhasil di-download!</div>';
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
